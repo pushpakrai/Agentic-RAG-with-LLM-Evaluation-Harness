@@ -1,243 +1,212 @@
 # 🤖 Agentic RAG with LLM Evaluation Harness
 
-### Intelligent Document Retrieval with Agentic Reasoning, Hybrid Search, and LLM Evaluation
+### Building Context-Aware AI Systems Through Agentic Reasoning and Hybrid Retrieval
 
-An agentic Retrieval-Augmented Generation (RAG) system that reasons over unstructured documents using a streaming ReAct loop. The agent autonomously decides when and how to search, iteratively refines queries, retrieves relevant context, and validates citations before presenting its final answer.
+An intelligent Retrieval-Augmented Generation (RAG) application that enables an LLM-powered agent to explore document collections, select retrieval tools, gather supporting context, and generate evidence-backed responses.
 
-**Built with Python, LiteLLM, LanceDB, BM25, Sentence Transformers, Cross-Encoders, and Chainlit.**
+Unlike a conventional one-step RAG workflow, this project uses a **streaming ReAct agent architecture** that supports iterative retrieval, contextual exploration, and citation validation.
 
----
-
-## 🌟 Overview
-
-Traditional RAG systems generally retrieve relevant documents and pass the retrieved context to an LLM to generate an answer.
-
-This project explores an **Agentic RAG architecture** in which an AI agent can decide which retrieval tools to use, search iteratively, expand relevant context, and reason over retrieved information before generating a response.
-
-The system combines semantic search, keyword-based retrieval, cross-encoder reranking, and citation validation to improve the relevance and traceability of generated answers.
-
-An evaluation-oriented harness provides controls around retrieval, context management, agent execution, and answer validation.
-
-The project supports multiple LLM providers and two interaction interfaces:
-
-- Rich-powered terminal interface.
-- Chainlit browser interface.
-
-## ✨ Key Features
-
-### 🧠 Agentic RAG Architecture
-- Streaming ReAct agent loop.
-- Autonomous tool selection.
-- Iterative document search.
-- Multi-step reasoning support.
-- Context-aware answer generation.
-- Session history management.
-
-### 🔍 Hybrid Information Retrieval
-- BM25 keyword-based search.
-- Semantic vector search using cosine similarity.
-- Reciprocal Rank Fusion (RRF).
-- Cross-encoder reranking.
-- Neighboring chunk retrieval for context expansion.
-
-### 🤖 Multi-Provider LLM Integration
-- Anthropic Claude.
-- OpenAI GPT.
-- Google Gemini.
-- Provider switching through configuration.
-- LiteLLM-based provider abstraction.
-
-### 📚 Document Ingestion
-- Text document ingestion.
-- Markdown document ingestion.
-- PDF ingestion through optional local parsing support.
-- Recursive character text splitting.
-- Overlapping document chunks.
-- Local embedding generation.
-- LanceDB vector storage.
-- BM25 index creation and persistence.
-
-### 🛡️ Evaluation and Reliability Controls
-- Citation validation against retrieved chunk IDs.
-- Retrieved-context token budget.
-- Agent execution iteration limit.
-- Context expansion.
-- Answer revision when citation validation fails.
-- Session state tracking.
-
-### 💻 Multiple User Interfaces
-- Rich terminal interface.
-- Chainlit browser interface.
-- Real-time streaming of tool calls and answer tokens.
+**Core technologies:** Python · LiteLLM · LanceDB · BM25 · Sentence Transformers · Cross-Encoders · Chainlit
 
 ---
 
-## 🏗️ System Architecture
+## 🌐 Project Overview
 
-The following diagram illustrates the major components and their interactions.
+Retrieving relevant information is only one part of building a reliable document-based AI application. An effective system must also manage context, select useful evidence, and maintain traceability between generated answers and source documents.
+
+This project brings these capabilities together through an agent-oriented architecture.
+
+The agent can:
+
+- Interpret a user's question and determine the next action.
+- Select appropriate document retrieval tools.
+- Combine keyword-based and semantic search results.
+- Refine its information gathering through multiple iterations.
+- Expand relevant passages using neighboring document chunks.
+- Generate responses with references to retrieved chunk identifiers.
+- Validate citations through post-processing hooks.
+
+The application also provides multiple LLM providers and interfaces, making it possible to interact with the same agent through a terminal or browser.
+
+## ✨ Core Capabilities
+
+| Capability                | Implementation                    |
+| ------------------------- | --------------------------------- |
+| 🧠 Agent orchestration    | Streaming ReAct execution loop    |
+| 🔎 Hybrid retrieval       | BM25 and semantic similarity      |
+| 🔀 Result combination     | Reciprocal Rank Fusion            |
+| 🎯 Relevance refinement   | Cross-encoder reranking           |
+| 📚 Document indexing      | Chunking, embeddings, and LanceDB |
+| 🔗 Context exploration    | Neighboring chunk retrieval       |
+| 🛡️ Citation checks       | Retrieved chunk ID validation     |
+| 📏 Context management     | Retrieved-token budget            |
+| 🔌 Model integration      | LiteLLM provider abstraction      |
+| 💻 Application interfaces | Rich terminal and Chainlit        |
+
+### 🧠 Agent-Based Information Retrieval
+
+The agent is not restricted to a single retrieval operation. It can select tools, inspect returned information, and continue retrieving evidence when additional context is needed.
+
+### 🔍 Combined Search Strategy
+
+Two retrieval approaches work together:
+
+- **BM25:** Finds relevant content through keyword matching.
+- **Semantic search:** Finds conceptually related passages using vector similarity.
+
+Their rankings are combined using RRF before cross-encoder reranking.
+
+### 🛡️ Answer Reliability Mechanisms
+
+The harness includes citation validation, execution limits, session tracking, and context-budget controls. These mechanisms help manage the answering process and improve traceability.
+
+---
+
+## 🏗️ Architecture
+
+The application is organized into five major layers: interfaces, rendering, agent orchestration, retrieval, and document ingestion.
 
 ```mermaid
-flowchart TD
-    U(["User Question"])
+flowchart TB
+    USER(["👤 User Query"])
 
-    subgraph UI["User Interfaces"]
-        CLI["main.py - Terminal Interface"]
-        WEB["app.py - Chainlit Interface"]
+    subgraph INTERFACE["Application Interfaces"]
+        CLI["Terminal - main.py"]
+        WEB["Chainlit - app.py"]
     end
 
-    subgraph RENDER["Rendering Layer"]
-        TR["Terminal Renderer - Rich"]
-        CR["Chainlit Renderer - Streaming UI"]
+    subgraph RENDER["Rendering"]
+        R1["Rich Renderer"]
+        R2["Chainlit Renderer"]
     end
 
-    subgraph AGENT["Agent Harness"]
-        A["Streaming ReAct Agent"]
-        P["LLM Provider Registry - LiteLLM"]
-        H["Pre/Post Hooks - Citation Validation - Context Budget"]
-        S["Session State - History and Token Tracking"]
+    subgraph CORE["Agent Orchestration"]
+        AGENT["Streaming ReAct Agent"]
+        PROVIDER["LiteLLM Provider Registry"]
+        HOOKS["Pre/Post Execution Hooks"]
+        STATE["Session State"]
     end
 
-    subgraph TOOLS["Agent Tools"]
+    subgraph TOOLS["Agent Toolset"]
         T1["list_collections"]
         T2["search_documents"]
         T3["get_context"]
         T4["think"]
     end
 
-    subgraph RETRIEVAL["Hybrid Retrieval"]
-        HS["Hybrid Search"]
-        BM["BM25 Search"]
-        VS["Semantic Search - LanceDB"]
-        RRF["Reciprocal Rank Fusion"]
-        RR["Cross-Encoder Reranking"]
+    subgraph SEARCH["Retrieval Engine"]
+        BM25["BM25 Keyword Search"]
+        VECTOR["LanceDB Vector Search"]
+        FUSION["Reciprocal Rank Fusion"]
+        RERANK["Cross-Encoder Reranking"]
     end
 
-    subgraph INGESTION["Document Ingestion"]
-        D["PDF / TXT / MD Documents"]
-        CH["Recursive Text Chunking"]
-        EM["Embedding Generation"]
-        IDX["Vector and BM25 Indexing"]
+    subgraph INGEST["Document Preparation"]
+        DOCS[("PDF / TXT / Markdown")]
+        SPLIT["Recursive Chunking"]
+        EMBED["Embedding Generation"]
+        INDEX["Index Construction"]
     end
 
-    ANS(["Validated Answer with Chunk Citations"])
+    ANSWER(["Evidence-Based Response"])
 
-    U --> CLI
-    U --> WEB
+    USER --> CLI
+    USER --> WEB
 
-    CLI --> TR --> A
-    WEB --> CR --> A
+    CLI --> R1 --> AGENT
+    WEB --> R2 --> AGENT
 
-    A --> P
-    A --> H
-    A --> S
-    A --> TOOLS
+    AGENT --> PROVIDER
+    AGENT --> HOOKS
+    AGENT --> STATE
+    AGENT --> TOOLS
 
-    T1 --> VS
-    T2 --> HS
-    T3 --> VS
+    T1 --> VECTOR
+    T2 --> BM25
+    T2 --> VECTOR
+    T3 --> VECTOR
 
-    HS --> BM
-    HS --> VS
-    BM --> RRF
-    VS --> RRF
-    RRF --> RR
-    RR --> A
+    BM25 --> FUSION
+    VECTOR --> FUSION
+    FUSION --> RERANK
+    RERANK --> AGENT
 
-    D --> CH --> EM --> IDX
-    IDX --> VS
-    IDX --> BM
+    DOCS --> SPLIT --> EMBED --> INDEX
+    INDEX --> VECTOR
+    INDEX --> BM25
 
-    A --> H --> ANS
+    AGENT --> HOOKS --> ANSWER
 ```
 
----
+### 🔄 Request Lifecycle
 
-## 🧰 Technology Stack
-
-| Category | Technologies |
-|---|---|
-| Programming Language | Python |
-| LLM Integration | LiteLLM |
-| AI Models | Anthropic Claude, OpenAI GPT, Google Gemini |
-| Agent Architecture | ReAct Agent Loop |
-| Retrieval Architecture | Agentic Hybrid RAG |
-| Vector Database | LanceDB |
-| Keyword Retrieval | BM25 / BM25Okapi |
-| Embeddings | Sentence Transformers |
-| Embedding Model | `BAAI/bge-small-en-v1.5` |
-| Reranking | Cross-Encoder |
-| Reranker Model | `cross-encoder/ms-marco-MiniLM-L-6-v2` |
-| Rank Fusion | Reciprocal Rank Fusion (RRF) |
-| Document Processing | TXT, Markdown, PDF |
-| PDF Parsing | `liteparse` (optional) |
-| Terminal Interface | Rich |
-| Web Interface | Chainlit |
-| Package Management | uv |
-| Configuration | Python configuration and environment variables |
+1. **Input:** A question enters through the terminal or Chainlit interface.
+2. **Reasoning:** The ReAct agent evaluates the question and selects an action.
+3. **Tool execution:** The selected tool accesses the document retrieval components.
+4. **Evidence retrieval:** Keyword and semantic results are combined and reranked.
+5. **Context inspection:** The agent can retrieve neighboring chunks for additional information.
+6. **Response generation:** The LLM generates an answer using the gathered evidence.
+7. **Validation:** Post-processing checks cited chunk identifiers against retrieved evidence.
+8. **Output:** The response is streamed to the selected interface.
 
 ---
 
-## 📁 Project Structure
+## 🧰 Technology Ecosystem
+
+| Area                   | Technology                             |
+| ---------------------- | -------------------------------------- |
+| Language               | Python                                 |
+| LLM abstraction        | LiteLLM                                |
+| Agent pattern          | ReAct                                  |
+| Language models        | Claude, GPT, Gemini                    |
+| Vector storage         | LanceDB                                |
+| Keyword retrieval      | BM25 / BM25Okapi                       |
+| Embedding framework    | Sentence Transformers                  |
+| Embedding model        | `BAAI/bge-small-en-v1.5`               |
+| Reranking framework    | Cross-Encoder                          |
+| Reranking model        | `cross-encoder/ms-marco-MiniLM-L-6-v2` |
+| Ranking fusion         | Reciprocal Rank Fusion                 |
+| Document formats       | TXT, Markdown, PDF                     |
+| Optional PDF parser    | liteparse                              |
+| Terminal rendering     | Rich                                   |
+| Browser interface      | Chainlit                               |
+| Environment management | uv                                     |
+
+---
+
+## 📂 Repository Layout
 
 ```text
 Agentic-RAG-with-LLM-Evaluation-Harness/
 │
 ├── harness/
 │   ├── agent.py
-│   │   └── Core streaming ReAct agent loop
-│   │
 │   ├── providers.py
-│   │   └── LiteLLM wrapper and provider registry
-│   │
 │   ├── tools.py
-│   │   └── Agent tool implementations and JSON schemas
-│   │
 │   ├── hooks.py
-│   │   └── Middleware, citation validation and context budget
-│   │
 │   └── state.py
-│       └── Session history, chunk IDs and token tracking
 │
 ├── ingestion/
 │   ├── chunker.py
-│   │   └── Recursive character text splitting
-│   │
 │   ├── pipeline.py
-│   │   └── Chunking, embedding and indexing pipeline
-│   │
 │   └── ingest.py
-│       └── Document ingestion CLI
 │
 ├── retrieval/
 │   ├── search.py
-│   │   └── Hybrid search, reranking and result formatting
-│   │
 │   ├── vector_store.py
-│   │   └── LanceDB vector storage and retrieval
-│   │
 │   ├── bm25.py
-│   │   └── BM25 indexing and keyword search
-│   │
 │   └── embeddings.py
-│       └── Sentence Transformer and Cross-Encoder wrappers
 │
 ├── renderers/
 │   ├── base.py
-│   │   └── Abstract renderer interface
-│   │
 │   ├── terminal.py
-│   │   └── Rich terminal renderer
-│   │
 │   └── chainlit.py
-│       └── Chainlit browser renderer
 │
 ├── sample_docs/
-│   └── Example documents for testing
 │
 ├── .env.example
 ├── .gitignore
 ├── .python-version
-│
 ├── IMPLEMENTATION_PLAN.md
 ├── PIPELINE.md
 ├── RAG_AGENT_HARNESS.md
@@ -250,21 +219,39 @@ Agentic-RAG-with-LLM-Evaluation-Harness/
 └── pyproject.toml
 ```
 
+### 🧩 Main Components
+
+| Component                   | Responsibility                                          |
+| --------------------------- | ------------------------------------------------------- |
+| `harness/agent.py`          | Executes the streaming ReAct loop                       |
+| `harness/providers.py`      | Manages LLM provider configurations                     |
+| `harness/tools.py`          | Defines agent tools and their schemas                   |
+| `harness/hooks.py`          | Handles middleware, citation checks, and context limits |
+| `harness/state.py`          | Maintains conversation and retrieval state              |
+| `ingestion/chunker.py`      | Splits source documents into chunks                     |
+| `ingestion/pipeline.py`     | Coordinates embedding and indexing                      |
+| `ingestion/ingest.py`       | Provides the ingestion command-line interface           |
+| `retrieval/search.py`       | Coordinates hybrid retrieval and reranking              |
+| `retrieval/vector_store.py` | Provides LanceDB operations                             |
+| `retrieval/bm25.py`         | Handles keyword indexing and search                     |
+| `retrieval/embeddings.py`   | Provides embedding and reranking model wrappers         |
+| `renderers/`                | Implements terminal and browser output                  |
+
 ---
 
-## 🚀 Getting Started
+## 🚀 Installation and Setup
 
-### 1. Prerequisites
+### 1. Requirements
 
-Make sure you have:
+Before starting, prepare:
 
-- Python version specified in `.python-version`.
-- `uv` package manager.
+- Python version configured in `.python-version`.
+- [uv](https://docs.astral.sh/uv/) package manager.
 - An API key for at least one supported LLM provider.
-- Internet connectivity for model API access.
-- Sufficient local storage for embedding models and document indexes.
+- Internet access for model API requests.
+- Local storage for downloaded models and document indexes.
 
-### 2. Clone the Repository
+### 2. Download the Repository
 
 ```bash
 git clone https://github.com/pushpakrai/Agentic-RAG-with-LLM-Evaluation-Harness.git
@@ -272,55 +259,55 @@ git clone https://github.com/pushpakrai/Agentic-RAG-with-LLM-Evaluation-Harness.
 cd Agentic-RAG-with-LLM-Evaluation-Harness
 ```
 
-### 3. Create a Virtual Environment
+### 3. Set Up the Environment
 
 ```bash
 uv venv
 ```
 
-Activate the environment.
+Activate the virtual environment.
 
-**Windows PowerShell:**
+**Windows PowerShell**
 
 ```powershell
 .venv\Scripts\Activate.ps1
 ```
 
-**Linux / macOS:**
+**Linux / macOS**
 
 ```bash
 source .venv/bin/activate
 ```
 
-### 4. Install Dependencies
+### 4. Install Project Dependencies
 
 ```bash
 uv pip install -e .
 ```
 
-For optional PDF ingestion support:
+Install the optional PDF parser if PDF ingestion is required:
 
 ```bash
 uv pip install liteparse
 ```
 
-### 5. Configure API Keys
+### 5. Configure Model Credentials
 
-Create your environment file from the provided template.
+Create your local environment file.
 
-**Windows PowerShell:**
+**Windows PowerShell**
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-**Linux / macOS:**
+**Linux / macOS**
 
 ```bash
 cp .env.example .env
 ```
 
-Configure the API key for your selected provider:
+Add the relevant credentials to `.env`:
 
 ```env
 ANTHROPIC_API_KEY=your_anthropic_api_key
@@ -328,338 +315,347 @@ OPENAI_API_KEY=your_openai_api_key
 GEMINI_API_KEY=your_gemini_api_key
 ```
 
-You only need the key for the provider you intend to use.
+Only configure the credentials required by your selected provider.
 
-Keep `.env` private and never commit actual API keys to GitHub.
+**Security:** Never publish actual API credentials or commit your private `.env` file.
 
 ---
 
 ## 📥 Document Ingestion
 
-The ingestion pipeline processes documents and prepares them for retrieval.
+The ingestion module prepares source files for retrieval by converting documents into chunks, generating embeddings, and building searchable indexes.
 
-### Ingest a Directory
+### Ingest a Document Collection
 
 ```bash
 python -m ingestion.ingest --path ./sample_docs --collection docs
 ```
 
-### Ingest a Single File
+### Ingest an Individual File
 
 ```bash
 python -m ingestion.ingest --path report.pdf --collection reports
 ```
 
-### Supported Document Formats
+### Supported Input Types
 
-| Format | Extension | Support |
-|---|---|---|
-| Text | `.txt` | Supported |
-| Markdown | `.md` | Supported |
-| PDF | `.pdf` | Optional `liteparse` dependency |
+| Extension | Format        | Availability                  |
+| --------- | ------------- | ----------------------------- |
+| `.txt`    | Plain text    | Supported                     |
+| `.md`     | Markdown      | Supported                     |
+| `.pdf`    | PDF documents | Requires optional `liteparse` |
 
-### Ingestion Workflow
+### Ingestion Sequence
 
-1. Read source documents.
-2. Split documents into overlapping text chunks.
-3. Generate embeddings using Sentence Transformers.
-4. Store vector representations in LanceDB.
-5. Build and persist the BM25 index.
-6. Make the indexed collection available for retrieval.
+```text
+Source Documents
+       |
+       v
+Document Loading
+       |
+       v
+Recursive Text Chunking
+       |
+       v
+Embedding Generation
+       |
+       +--------------------+
+       |                    |
+       v                    v
+  LanceDB Index         BM25 Index
+       |                    |
+       +---------+----------+
+                 |
+                 v
+          Searchable Data
+```
 
 ---
 
-## 💬 Asking Questions
+## 💬 Running the Application
 
-### 1. Single Question — Terminal
+### 🖥️ Terminal — Single Query
 
 ```bash
 python main.py "What was ACME's Q3 revenue?"
 ```
 
-### 2. Interactive Terminal Mode
+### 🔁 Interactive Terminal Session
 
 ```bash
 python main.py
 ```
 
-### 3. Select a Different LLM Provider
+### 🔌 Choose an LLM Provider
 
 ```bash
 python main.py --provider openai-fast "What are the key risks mentioned?"
 ```
 
-### 4. Launch Browser Interface
+### 🌐 Start the Chainlit Interface
 
 ```bash
 chainlit run app.py
 ```
 
-The Chainlit interface provides an interactive way to ask questions and observe streaming agent activity.
+The browser interface allows users to interact with the agent while observing streamed execution activity.
 
 ---
 
-## 🤖 Supported LLM Providers
+## 🤖 LLM Provider Configuration
 
-The application provides multiple model configurations through its provider registry.
+The provider registry uses LiteLLM to expose different model configurations through a consistent interface.
 
-| Provider Key | Model | Description |
-|---|---|---|
-| `gemini-fast` | `gemini-2.5-flash` | Default fast model |
-| `gemini-smart` | `gemini-2.5-pro` | Higher-capability Gemini model |
-| `anthropic-fast` | `claude-haiku-4-5` | Fast Claude model |
-| `anthropic-smart` | `claude-sonnet-4-6` | Advanced Claude model with extended thinking enabled |
-| `openai-fast` | `gpt-4o-mini` | Lightweight OpenAI model |
-| `openai-smart` | `gpt-4o` | Advanced OpenAI model |
+| Provider Key      | Model               | Intended Use                                |
+| ----------------- | ------------------- | ------------------------------------------- |
+| `gemini-fast`     | `gemini-2.5-flash`  | Default fast configuration                  |
+| `gemini-smart`    | `gemini-2.5-pro`    | Higher-capability Gemini configuration      |
+| `anthropic-fast`  | `claude-haiku-4-5`  | Fast Claude configuration                   |
+| `anthropic-smart` | `claude-sonnet-4-6` | Claude configuration with extended thinking |
+| `openai-fast`     | `gpt-4o-mini`       | Lightweight OpenAI configuration            |
+| `openai-smart`    | `gpt-4o`            | Advanced OpenAI configuration               |
 
-Select the provider through the CLI or application configuration.
-
----
-
-## 🛠️ Agent Tools
-
-The agent has access to tools that help it retrieve information and reason over documents.
-
-| Tool | Description |
-|---|---|
-| `list_collections` | Lists available indexed document collections |
-| `search_documents` | Performs hybrid BM25 and semantic search with reranking |
-| `get_context` | Retrieves a selected chunk and neighboring chunks |
-| `think` | Provides a scratchpad for multi-step reasoning |
-
-### Agent Execution Workflow
-
-The ReAct agent can:
-
-1. Analyze the user's question.
-2. Decide whether document retrieval is necessary.
-3. Select an appropriate tool.
-4. Search the indexed document collection.
-5. Examine retrieved results.
-6. Expand context when necessary.
-7. Continue reasoning or perform additional retrieval.
-8. Generate an evidence-supported answer.
-
-The agent runs with a maximum of 10 iterations according to the current implementation.
+Switching providers does not require redesigning the retrieval architecture.
 
 ---
 
-## 🔍 Hybrid Retrieval Pipeline
+## 🛠️ Agent Toolset
 
-The retrieval system combines keyword search and semantic search.
+The agent uses a collection of tools to interact with indexed documents.
 
-### 1. BM25 Keyword Search
+| Tool               | Purpose                                                   |
+| ------------------ | --------------------------------------------------------- |
+| `list_collections` | Discovers available document collections                  |
+| `search_documents` | Performs hybrid retrieval with reranking                  |
+| `get_context`      | Fetches a selected chunk and neighboring passages         |
+| `think`            | Supports intermediate reasoning within the agent workflow |
 
-BM25 retrieves documents based on lexical relevance and keyword matching.
+### Agent Execution Limits
 
-It helps identify documents containing important terms from the user's question.
+The current ReAct implementation supports a maximum of **10 iterations**.
 
-### 2. Semantic Vector Search
-
-Sentence Transformers generate embeddings using:
-
-`BAAI/bge-small-en-v1.5`
-
-The embeddings are stored in LanceDB and used for cosine similarity-based retrieval.
-
-Semantic search helps identify relevant content even when the wording differs from the original question.
-
-### 3. Reciprocal Rank Fusion
-
-The system combines BM25 and semantic search rankings using Reciprocal Rank Fusion (RRF).
-
-This helps balance keyword relevance and semantic similarity.
-
-### 4. Cross-Encoder Reranking
-
-Retrieved candidates are reranked using:
-
-`cross-encoder/ms-marco-MiniLM-L-6-v2`
-
-The reranker evaluates query-document relevance before the selected results are passed to the agent.
-
-### 5. Context Expansion
-
-The `get_context` tool retrieves neighboring chunks around a relevant result.
-
-This allows the agent to inspect additional information surrounding a selected passage.
+This provides a boundary for repeated tool execution and multi-step retrieval.
 
 ---
 
-## 🛡️ LLM Evaluation and Citation Validation
+## 🔬 Inside the Retrieval Engine
 
-The harness includes controls intended to improve the reliability of generated responses.
+The retrieval layer combines lexical matching, semantic similarity, ranking fusion, and relevance reranking.
 
-### Citation Validation
+### 1. 🔤 Lexical Retrieval — BM25
 
-Retrieved document chunks have identifiers.
+BM25 identifies passages based on query terms and document relevance.
 
-The agent uses chunk IDs to reference supporting information in its response.
+It is useful when a question contains specific names, terminology, identifiers, or phrases that appear in the source material.
 
-A post-processing hook checks whether cited chunk IDs were actually retrieved.
+### 2. 🧬 Semantic Retrieval — Embeddings
 
-If an answer contains hallucinated chunk identifiers, the validation mechanism triggers a revision workflow.
+The project uses:
 
-### Context Budget Management
+```text
+BAAI/bge-small-en-v1.5
+```
 
-The harness enforces a maximum retrieved-context token budget.
+Sentence Transformer embeddings represent document chunks as vectors. LanceDB stores these vectors and supports cosine similarity-based retrieval.
 
-Default:
+This allows the system to find conceptually related passages even when the wording differs.
+
+### 3. 🔀 Reciprocal Rank Fusion
+
+BM25 and semantic search produce separate result rankings.
+
+Reciprocal Rank Fusion combines these rankings into a unified candidate list, allowing lexical and semantic relevance to contribute to retrieval.
+
+### 4. 🎯 Cross-Encoder Reranking
+
+The candidate results are reranked using:
+
+```text
+cross-encoder/ms-marco-MiniLM-L-6-v2
+```
+
+Unlike relying only on initial retrieval scores, the cross-encoder evaluates the relevance of query-document pairs before the final candidates are returned.
+
+### 5. 📖 Context Expansion
+
+The `get_context` tool retrieves neighboring chunks around a selected result.
+
+This helps the agent inspect surrounding information instead of relying exclusively on an isolated passage.
+
+---
+
+## 🛡️ Evaluation-Oriented Reliability Controls
+
+The harness includes several mechanisms to manage the agent's execution and inspect the evidence used in its answers.
+
+### 🔗 Citation Validation
+
+Document chunks have identifiers that can be referenced in generated responses.
+
+A post-processing hook checks whether cited chunk IDs belong to the retrieved evidence.
+
+When invalid identifiers are detected, the configured revision workflow can request a corrected answer.
+
+### 📏 Retrieved Context Budget
+
+The application limits the amount of retrieved context passed through the answering workflow.
 
 ```python
 max_retrieved_tokens = 8000
 ```
 
-This helps prevent excessive retrieved context from overflowing the configured prompt budget.
+This helps control prompt size and retrieved-context consumption.
 
-### Agent Iteration Control
+### 🔄 Execution Management
 
-The ReAct loop has a maximum execution limit to prevent uncontrolled tool execution.
+The agent has an iteration limit to constrain repeated tool calls.
 
-### Session State
+### 🧠 Session Tracking
 
-The session state tracks:
+The session state maintains information such as:
 
 - Conversation history.
-- Retrieved chunk IDs.
-- Token usage information.
+- Retrieved chunk identifiers.
+- Token-count information.
 
-> These are evaluation-oriented reliability controls. They do not establish that every generated factual claim is correct or that the system has undergone a formal benchmark evaluation.
-
----
-
-## ⚙️ Configuration
-
-The main configuration is maintained in `config.py`.
-
-| Setting | Default | Description |
-|---|---|---|
-| `provider` | `gemini-fast` | Default LLM provider |
-| `search_k` | `10` | Number of candidates retrieved before reranking |
-| `rerank_top_k` | `5` | Number of results retained after reranking |
-| `context_window_size` | `2` | Neighboring chunks retrieved by `get_context` |
-| `max_retrieved_tokens` | `8000` | Maximum retrieved-context token budget |
-| `embedding_model` | `BAAI/bge-small-en-v1.5` | Local embedding model |
-| `reranker_model` | `cross-encoder/ms-marco-MiniLM-L-6-v2` | Cross-encoder reranking model |
-| `lance_db_path` | `./corpus.lance` | LanceDB storage location |
-
-Modify these settings according to your document collection, model provider, and retrieval requirements.
+> **Important:** These mechanisms are reliability and evaluation-oriented controls. Citation validation does not independently establish factual correctness, and the presence of these controls does not mean that a formal benchmark evaluation suite or automated faithfulness scoring has been implemented.
 
 ---
 
-## 📊 Traditional RAG vs Agentic RAG
+## ⚙️ Application Configuration
 
-| Traditional RAG | Agentic RAG |
-|---|---|
-| Usually follows a predefined retrieval workflow | Agent can decide when to retrieve |
-| Typically performs a fixed retrieval step | Supports iterative retrieval |
-| Limited retrieval control | Tool-based retrieval decisions |
-| Context often assembled in one step | Supports additional context expansion |
-| Answer generated from initial retrieved results | Agent can inspect and refine evidence |
-| Citation checks may be absent | Includes chunk-ID citation validation |
+The primary settings are maintained in `config.py`.
 
-The architecture in this project explores how agent-driven retrieval and validation mechanisms can improve the transparency and controllability of RAG workflows.
+| Parameter              | Default                                | Function                                      |
+| ---------------------- | -------------------------------------- | --------------------------------------------- |
+| `provider`             | `gemini-fast`                          | Default LLM configuration                     |
+| `search_k`             | `10`                                   | Initial retrieval candidate count             |
+| `rerank_top_k`         | `5`                                    | Number of retained reranked results           |
+| `context_window_size`  | `2`                                    | Neighboring chunks retrieved by `get_context` |
+| `max_retrieved_tokens` | `8000`                                 | Retrieved-context token limit                 |
+| `embedding_model`      | `BAAI/bge-small-en-v1.5`               | Embedding model                               |
+| `reranker_model`       | `cross-encoder/ms-marco-MiniLM-L-6-v2` | Reranking model                               |
+| `lance_db_path`        | `./corpus.lance`                       | Local vector-store path                       |
 
----
-
-## 📚 Additional Documentation
-
-The repository includes additional technical documentation:
-
-| Document | Description |
-|---|---|
-| [PIPELINE.md](PIPELINE.md) | Detailed ingestion and answering pipeline walkthrough |
-| [RAG_AGENT_HARNESS.md](RAG_AGENT_HARNESS.md) | Agent harness documentation |
-| [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | Implementation plan and development details |
-| [chainlit.md](chainlit.md) | Chainlit interface documentation |
+These values can be adjusted in the project configuration according to the retrieval workload and document collection.
 
 ---
 
-## 🔮 Future Enhancements
+## ⚖️ Traditional RAG and Agentic RAG
 
-Potential areas for extending the project include:
+| Traditional RAG                              | This Agentic RAG Approach                    |
+| -------------------------------------------- | -------------------------------------------- |
+| Usually uses a predefined retrieval sequence | Uses a tool-enabled reasoning loop           |
+| Commonly retrieves context in a fixed step   | Can perform additional retrieval iterations  |
+| Limited control over retrieval decisions     | Agent selects retrieval tools                |
+| Often uses initially retrieved passages      | Supports neighboring context expansion       |
+| Generates an answer from retrieved context   | Can inspect evidence before final generation |
+| May not validate source references           | Includes retrieved chunk ID validation       |
 
-- Automated retrieval evaluation using benchmark datasets.
+The objective is to explore how agent-controlled retrieval can make document-based question answering more flexible and traceable.
+
+---
+
+## 📚 Project Documentation
+
+Additional technical documentation is available in the repository.
+
+| File                     | Contents                                     |
+| ------------------------ | -------------------------------------------- |
+| `PIPELINE.md`            | Ingestion and answering pipeline walkthrough |
+| `RAG_AGENT_HARNESS.md`   | Agent harness implementation documentation   |
+| `IMPLEMENTATION_PLAN.md` | Project implementation plan                  |
+| `chainlit.md`            | Chainlit interface instructions              |
+
+---
+
+## 🧪 Potential Improvements
+
+Possible future development directions include:
+
+- Automated evaluation using RAG benchmark datasets.
 - Faithfulness and answer relevance scoring.
-- Context precision and context recall metrics.
+- Context precision and context recall measurements.
 - LLM-as-a-Judge evaluation.
-- Retrieval performance benchmarking.
-- Advanced multi-agent collaboration.
+- Retrieval latency and performance benchmarking.
 - Query decomposition and query rewriting.
+- Multi-agent coordination.
 - Persistent conversational memory.
-- Improved document parsing and metadata extraction.
-- Observability and agent execution tracing.
-- Automated evaluation reports and dashboards.
-- Production deployment and API integration.
+- Advanced document parsing and metadata extraction.
+- Agent execution tracing and observability.
+- Evaluation dashboards and automated reports.
+- Production API deployment.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions, suggestions, and improvements are welcome!
+Contributions and technical suggestions are welcome.
 
 To contribute:
 
-1. Fork the repository.
-2. Create a feature branch.
+**1. Fork the repository.**
+
+**2. Create a feature branch.**
 
 ```bash
 git checkout -b feat/your-feature
 ```
 
-3. Implement and test your changes.
-4. Commit your changes.
+**3. Implement and test your changes.**
+
+**4. Commit your work.**
 
 ```bash
 git add .
-git commit -m "feat: add your feature"
+git commit -m "feat: describe your change"
 ```
 
-5. Push your branch.
+**5. Push the branch.**
 
 ```bash
 git push origin feat/your-feature
 ```
 
-6. Open a Pull Request.
+**6. Submit a Pull Request.**
 
-Please include relevant documentation and tests when introducing new functionality.
-
----
-
-## 🔐 Security
-
-- Store API keys in environment variables.
-- Never commit `.env` files containing actual credentials.
-- Use `.env.example` only for placeholder configuration.
-- Avoid logging API keys or sensitive document content.
-- Review dependencies and update them when necessary.
+Please include appropriate documentation and tests when introducing new functionality.
 
 ---
 
-## 🙏 Acknowledgments
+## 🔐 Security Guidelines
 
-This project is built using the following technologies and open-source ecosystems:
+- Keep API credentials in environment variables.
+- Do not commit `.env` files containing real credentials.
+- Use placeholder values in `.env.example`.
+- Avoid exposing sensitive document content in application logs.
+- Review third-party dependencies and update them when appropriate.
 
-- [Python](https://www.python.org/) — Core programming language.
-- [LiteLLM](https://www.litellm.ai/) — Unified LLM provider interface.
-- [Anthropic](https://www.anthropic.com/) — Claude language models.
+---
+
+## 🙌 Acknowledgments
+
+This project builds on several open-source tools and AI ecosystems:
+
+- [Python](https://www.python.org/) — Application development.
+- [LiteLLM](https://www.litellm.ai/) — Unified model provider integration.
+- [Anthropic](https://www.anthropic.com/) — Claude models.
 - [OpenAI](https://openai.com/) — GPT models.
-- [Google Gemini](https://ai.google.dev/) — Gemini language models.
-- [LanceDB](https://lancedb.com/) — Vector database.
+- [Google AI](https://ai.google.dev/) — Gemini models.
+- [LanceDB](https://lancedb.com/) — Vector storage and search.
 - [Sentence Transformers](https://www.sbert.net/) — Embedding and reranking models.
 - [Hugging Face](https://huggingface.co/) — Model ecosystem.
-- [Chainlit](https://chainlit.io/) — Conversational AI application interface.
-- [Rich](https://github.com/Textualize/rich) — Terminal formatting and rendering.
-- [uv](https://docs.astral.sh/uv/) — Python package and environment management.
+- [Chainlit](https://chainlit.io/) — Conversational application interface.
+- [Rich](https://github.com/Textualize/rich) — Terminal rendering.
+- [uv](https://docs.astral.sh/uv/) — Python environment and package management.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License**.
+This project is intended to use the MIT License.
 
-See the [LICENSE](LICENSE) file for details.
+See the repository's `LICENSE` file for the license terms.
 
 ---
 
@@ -667,9 +663,9 @@ See the [LICENSE](LICENSE) file for details.
 
 **Pushpak Rai**
 
-- GitHub: [@pushpakrai](https://github.com/pushpakrai)
-- LinkedIn: [Pushpak Rai](https://www.linkedin.com/in/pushpak-rai-0ab3a3200/)
+- 🐙 GitHub: [@pushpakrai](https://github.com/pushpakrai)
+- 💼 LinkedIn: [Pushpak Rai](https://www.linkedin.com/in/pushpak-rai-0ab3a3200/)
 
 ---
 
-**Building intelligent RAG systems through agentic reasoning, hybrid retrieval, and reliable LLM evaluation.**
+\<p align="center">   \<strong>⚡ Exploring the next generation of document intelligence with agentic reasoning, hybrid retrieval, and evidence-aware AI.\</strong> \</p>
